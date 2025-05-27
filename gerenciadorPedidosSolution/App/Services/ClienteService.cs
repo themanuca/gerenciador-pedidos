@@ -14,6 +14,10 @@ namespace App.Services
     public class ClienteService:IClienteService
     {
         private readonly IClienteRepository _clienteRepository;
+        public ClienteService(IClienteRepository clienteRepository)
+        {
+            _clienteRepository = clienteRepository;
+        }
 
         public async Task CreateCliente(ClienteDTO clienteDto)
         {
@@ -69,6 +73,7 @@ namespace App.Services
             {
                 Id = clienteId.Id,
                 Nome= cliente.Nome,
+                Telefone = cliente.Telefone,
                 Email = cliente.Email,
                 DataCadastro = cliente.DataCadastro
             };
@@ -81,11 +86,17 @@ namespace App.Services
             {
                 throw new ValidationException("Erro de validação ao criar cliente.");
             }
+            var getCliente = await GetClienteById(clienteDto);
+            if(getCliente == null)
+            {
+                throw new ValidationException("Cliente não encontrado.");
+            }
             var cliente = new Cliente
             {
-                Nome = clienteDto.Nome,
-                Email = clienteDto.Email,
-                Telefone = clienteDto.Telefone,
+                Id = clienteDto.Id,
+                Nome = clienteDto.Nome ?? getCliente.Nome,
+                Email = clienteDto.Email ?? getCliente.Email,
+                Telefone = clienteDto.Telefone ?? getCliente.Telefone,
                 DataCadastro = DateTime.Now
 
             };
