@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Dapper;
+using Domain.Entities;
 using Domain.Interfaces;
 using Infra.Data;
 using System;
@@ -18,29 +19,52 @@ namespace Infra.Repository
             _dbContext = dbContext;
         }
 
-        public Task CreateProduto(Produto produto)
+        public async Task<int> CreateProduto(Produto produto)
         {
-            throw new NotImplementedException();
+            var sql = @"
+            INSERT INTO Produto (Nome, Descricao, Preco, QuantidadeEstoque)
+            VALUES (@Nome, @Descricao, @Preco, @QuantidadeEstoque);
+            SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            using var connection = _dbContext.CreateConnection();
+            return await connection.ExecuteScalarAsync<int>(sql, produto);
         }
 
-        public Task DeleteProduto(int id)
+        public async Task DeleteProduto(int id)
         {
-            throw new NotImplementedException();
+            var sql = "DELETE FROM Produto WHERE Id = @Id";
+            using var connection = _dbContext.CreateConnection();
+            await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        public Task<List<Produto>> GetAllProduto()
+        public async Task<IEnumerable<Produto>> GetAllProduto()
         {
-            throw new NotImplementedException();
+            var sql = "SELECT * FROM Produto";
+            using var connection = _dbContext.CreateConnection();
+            return await connection.QueryAsync<Produto>(sql);
         }
 
-        public Task<Produto> GetProdutoById(int id)
+        public async Task<Produto> GetProdutoById(int id)
         {
-            throw new NotImplementedException();
+            var sql = "SELECT * FROM Produto WHERE Id = @Id";
+            using var connection = _dbContext.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<Produto>(sql, new { Id = id });
         }
 
-        public Task UpdateProduto(Produto produto)
+        public async Task UpdateProduto(Produto produto)
         {
-            throw new NotImplementedException();
+            var sql = @"
+            UPDATE Produto
+            SET
+                Nome = @Nome,
+                Descricao = @Descricao,
+                Preco = @Preco,
+                QuantidadeEstoque = @QuantidadeEstoque
+            WHERE
+                Id = @Id;";
+
+            using var connection = _dbContext.CreateConnection();
+            await connection.ExecuteAsync(sql, produto);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Dapper;
+using Domain.Entities;
 using Domain.Interfaces;
 using Infra.Data;
 using System;
@@ -17,29 +18,51 @@ namespace Infra.Repository
             _dbContext = dbContext;
         }
 
-        public Task CreateCliente(Cliente cliente)
+        public async Task<int> CreateCliente(Cliente cliente)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                INSERT INTO Cliente (Nome, Email, Telefone, DataCadastro)
+                VALUES (@Nome, @Email, @Telefone, @DataCadastro);
+                SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            using var connection = _dbContext.CreateConnection();
+            return await connection.ExecuteScalarAsync<int>(sql, cliente);
         }
 
-        public Task DeleteCliente(int clienteId)
+        public async Task DeleteCliente(int clienteId)
         {
-            throw new NotImplementedException();
+            var sql = "DELETE FROM Cliente WHERE Id = @Id";
+            using var connection = _dbContext.CreateConnection();
+            await connection.QueryAsync<Cliente>(sql, new {Id =  clienteId});
         }
 
-        public Task<List<Cliente>> GetAllProduto()
+        public async Task<IEnumerable<Cliente>> GetAllClientes()
         {
-            throw new NotImplementedException();
+            var sql = "SELECT * FROM Cliente";
+            using var connection = _dbContext.CreateConnection();
+            return await connection.QueryAsync<Cliente>(sql);
         }
 
-        public Task<Cliente> GetClienteById(Cliente clienteId)
+        public async Task<Cliente> GetClienteById(Cliente clienteId)
         {
-            throw new NotImplementedException();
+            var sql = "SELECT * FROM Cliente WHERE Id = @Id";
+            using var connection = _dbContext.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<Cliente>(sql, new { clienteId.Id });
         }
 
-        public Task UpdateCliente(Cliente cliente)
+        public async Task UpdateCliente(Cliente cliente)
         {
-            throw new NotImplementedException();
+            var sql = @"
+                UPDATE Cliente
+                SET
+                    Nome = @Nome,
+                    Email = @Email,
+                    Telefone = @Telefone
+                WHERE
+                    Id = @Id;";
+
+            using var connection = _dbContext.CreateConnection();
+            await connection.ExecuteAsync(sql, cliente);
         }
     }
 }
