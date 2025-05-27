@@ -13,8 +13,7 @@ namespace Domain.Entities
         public DateTime DataPedido { get; set; }
         public decimal ValorTotal { get; set; }
         public string Status { get; set; }
-        public PedidoItem ItemPedido {  get; set; }
-        public List<Produto> Produtos { get; set; }
+        public List<PedidoItem> ItensPedido {  get; set; }
 
     }
 }

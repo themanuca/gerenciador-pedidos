@@ -9,10 +9,12 @@ namespace Domain.Interfaces
 {
     public interface IPedidoRepository
     {
-        Task<List<Pedido>> GetAllPedidos();
-        Task CreatePedido(Pedido pedido);
+        Task<IEnumerable<Pedido>> GetAllPedidos();
+        Task<int>CreatePedido(Pedido pedido);
         Task<Pedido> GetPedidoById(int id);
-        Task<Pedido> UpdateStatusPedido(Pedido pedido);
+        Task UpdateStatusPedido(Pedido pedido);
+        Task<IEnumerable<Pedido>> GetPedidosByClienteId(int clienteId);
+        Task<IEnumerable<Pedido>> GetPedidosByStatus(string status);
 
     }
 }

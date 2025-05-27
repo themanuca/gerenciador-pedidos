@@ -9,10 +9,10 @@ namespace Domain.Interfaces
 {
     public interface IClienteRepository
     {
-        Task CreateCliente(Cliente cliente);
+        Task<int>CreateCliente(Cliente cliente);
         Task UpdateCliente(Cliente cliente);
         Task DeleteCliente(int clienteId);
         Task<Cliente> GetClienteById(Cliente clienteId);
-        Task<List<Cliente>> GetAllProduto();
+        Task<IEnumerable<Cliente>> GetAllClientes();
     }
 }
