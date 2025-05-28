@@ -8,12 +8,14 @@ namespace PedidosAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ClienteController : ControllerBase
+
+
+    public class ProdutoController : ControllerBase
     {
-        private readonly IClienteService _clienteService;
-        public ClienteController(IClienteService clienteService) 
+        private readonly IProdutoService _produtoService;
+        public ProdutoController(IProdutoService produtoService)
         {
-            _clienteService = clienteService;
+            _produtoService = produtoService;
         }
 
         [HttpGet]
@@ -21,28 +23,30 @@ namespace PedidosAPI.Controllers
         {
             try
             {
-                var clientes = await _clienteService.GetAllClientes();
-                return Ok(clientes);
+                var produtos = await _produtoService.GetAllProduto();
+                return Ok(produtos);
+            }
+            catch {
 
-            } catch (Exception) {
                 throw;
             }
+
         }
         [HttpGet("{id}")]
         public async Task<ActionResult> Details(int id)
         {
             try
             {
-                var cliente = await _clienteService.GetClienteById(new ClienteDTO { Id = id });
-                return Ok(cliente);
+                var produto = await _produtoService.GetProdutoById(id);
+                return Ok(produto);
             }
-            catch (Exception) {
+            catch{
                 throw;
             }
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(ClienteDTO clienteDto)
+        public async Task<ActionResult> Create(ProdutoDTO produtoDto)
         {
             try
             {
@@ -50,18 +54,17 @@ namespace PedidosAPI.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-
-                await _clienteService.CreateCliente(clienteDto);
+                await _produtoService.CreateProduto(produtoDto);
                 return Ok();
             }
-            catch(Exception) 
+            catch
             {
                 throw;
             }
         }
 
         [HttpPut]
-        public async Task<ActionResult> Edit(ClienteDTO clienteDto)
+        public async Task<ActionResult> Edit(ProdutoDTO produtoDto)
         {
             try
             {
@@ -70,28 +73,25 @@ namespace PedidosAPI.Controllers
                     return BadRequest(ModelState);
                 }
 
-                await _clienteService.UpdateCliente(clienteDto);
+                await _produtoService.UpdateProduto(produtoDto);
                 return Ok();
             }
-            catch (Exception)
+            catch
             {
                 throw;
             }
         }
-
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
             try
             {
-                await _clienteService.DeleteCliente(id);
+                await _produtoService.DeleteProduto(id);
                 return Ok();
             }
-            catch (Exception)
-            {
+            catch {
                 throw;
             }
         }
-
     }
 }
