@@ -25,7 +25,12 @@ namespace Infra.Repository
                         VALUES (@ClienteId, @DataPedido, @ValorTotal, @Status)
                         SELECT CAST(SCOPE_IDENTITY() as int);";
             using var connection = _dbContext.CreateConnection();
-            return await connection.ExecuteScalarAsync<int>(sql, new { pedido });
+            return await connection.ExecuteScalarAsync<int>(sql, new {
+                ClienteId = pedido.ClienteId,
+                DataPedido = pedido.DataPedido,
+                ValorTotal = pedido.ValorTotal,
+                Status = pedido.Status
+            });
         }
 
         public async Task<IEnumerable<Pedido>> GetAllPedidos()
@@ -54,7 +59,7 @@ namespace Infra.Repository
                     WHERE
                         P.Id = @Id;";
             using var connection = _dbContext.CreateConnection();
-            return await connection.QueryFirstAsync<Pedido>(sql, new { Id = id});
+            return await connection.QueryFirstOrDefaultAsync<Pedido>(sql, new { Id = id});
         }
 
         public async Task<IEnumerable<Pedido>> GetPedidosByClienteId(int clienteId)

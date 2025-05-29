@@ -22,12 +22,17 @@ namespace Infra.Repository
             var sql = @"INSERT INTO PedidoItem (PedidoId, ProdutoId, Quantidade, PrecoUnitario)
                         VALUES(@PedidoId, @ProdutoId, @Quantidade, @PrecoUnitario);";
             using var connection = _dBContext.CreateConnection();
-            await connection.ExecuteScalarAsync(sql, new {pedidoItem});
+            await connection.ExecuteScalarAsync(sql, new {
+                pedidoItem.PedidoId, 
+                pedidoItem.ProdutoId, 
+                pedidoItem.Quantidade, 
+                pedidoItem.PrecoUnitario
+            });
         }
 
         public async Task<IEnumerable<PedidoItem>> GetPedidoItems(int idPedido)
         {
-            var sql = @"SELECT * FROM PedidoItem WHERE = @Id;";
+            var sql = @"SELECT * FROM PedidoItem WHERE PedidoId = @Id;";
             using var connection = _dBContext.CreateConnection();
             
             return await connection.QueryAsync<PedidoItem>(sql, new { Id = idPedido});
