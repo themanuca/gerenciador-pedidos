@@ -9,7 +9,11 @@ namespace App.DTOs
 {
     public class PedidoItemDetaisDTO
     {
-        public PedidoDTO Pedido { get; set; }
-        public List<ProdutoDTO> Produtos { get; set; } 
+        public int Id { get; set; }
+        public int PedidoId { get; set; }
+        public int ProdutoId { get; set; }
+        public int Quantidade { get; set; }
+        public decimal PrecoUnitario { get; set; }
+        public string Nome { get; set; }
     }
 }
