@@ -11,9 +11,9 @@ namespace App.Interfaces
     public interface IPedidoService
     {
         Task<PedidoDTO> CreatePedido(PedidoDTO pedidoDto);
-        Task<List<PedidoItemDetaisDTO>> GetAllPedidos();
+        Task<IEnumerable<PedidoDTO>> GetAllPedidos();
         Task UpdateStatusPedido(PedidoDTO pedidoDto);
-        Task<PedidoDTO> GetPedidoById(int id);
+        Task<PedidoDetaisDTO> GetPedidoById(int id);
         Task<IEnumerable<PedidoDTO>> GetPedidosByClienteId(int clienteId);
         Task<IEnumerable<PedidoDTO>> GetPedidosByStatus(string status);
 
