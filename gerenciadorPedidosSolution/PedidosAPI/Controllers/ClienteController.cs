@@ -60,11 +60,12 @@ namespace PedidosAPI.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<ActionResult> Edit(ClienteDTO clienteDto)
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Edit(int id, ClienteDTO clienteDto)
         {
             try
             {
+                clienteDto.Id = id;
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);

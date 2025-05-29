@@ -40,7 +40,7 @@ namespace PedidosAPI.Controllers
                 var produto = await _produtoService.GetProdutoById(id);
                 return Ok(produto);
             }
-            catch{
+            catch {
                 throw;
             }
         }
@@ -63,11 +63,12 @@ namespace PedidosAPI.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<ActionResult> Edit(ProdutoDTO produtoDto)
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Edit(int id, ProdutoDTO produtoDto)
         {
             try
             {
+                produtoDto.Id = id;
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
