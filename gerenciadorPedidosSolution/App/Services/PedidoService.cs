@@ -59,7 +59,6 @@ namespace App.Services
             foreach (var itemDto in pedido.ItensPedido)
             {
                 itemDto.PedidoId = pedidoId;
-                itemDto.PrecoUnitario = pedido.ValorTotal / itemDto.Quantidade;
                 await _itemRepository.CreatePedidoItem(itemDto);
 
                 var produto = await _produtoRepository.GetProdutoById(itemDto.ProdutoId);

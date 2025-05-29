@@ -14,9 +14,11 @@ namespace App.Services
     public class ClienteService:IClienteService
     {
         private readonly IClienteRepository _clienteRepository;
-        public ClienteService(IClienteRepository clienteRepository)
+        private readonly IPedidoRepository _pedidoRepository;
+        public ClienteService(IClienteRepository clienteRepository, IPedidoRepository pedidoRepository)
         {
             _clienteRepository = clienteRepository;
+            _pedidoRepository = pedidoRepository;
         }
 
         public async Task CreateCliente(ClienteDTO clienteDto)
@@ -43,6 +45,11 @@ namespace App.Services
             if(clienteId == 0)
             {
                 throw new ValidationException("Cliente não encontrado.");
+            }
+            var pedidosVinculados = await _pedidoRepository.GetPedidosByClienteId(clienteId);
+            if (pedidosVinculados.Any())
+            {
+                throw new ArgumentException($"Há {pedidosVinculados.Count()} pedidos vinculados a esse cliente. \n Por favor, desfaça os pedidos antes de removelo.");
             }
             await _clienteRepository.DeleteCliente(clienteId);
         }
