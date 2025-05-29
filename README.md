@@ -45,6 +45,14 @@ CREATE TABLE PedidoItem (
     FOREIGN KEY (ProdutoId) REFERENCES Produto(Id)
 );
 ```
+## Testes
+Testes unitarios com XUnit.
+Se houvesse mais tempo teria sido melhor.
+![image](https://github.com/user-attachments/assets/f409d749-605d-4698-8c84-e86ccc592ce4)
+## Swagger
+![image](https://github.com/user-attachments/assets/7b3fce4e-4f14-486a-adbb-01f696d9e674)
+
+
 Popular a tabela de Produto para facilitar o desenvolvimento e testes
 ```
 INSERT INTO Produto (Nome, Descricao, Preco, QuantidadeEstoque) VALUES
