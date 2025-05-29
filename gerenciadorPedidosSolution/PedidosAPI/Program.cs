@@ -17,6 +17,10 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
+builder.Services.AddScoped<IPedidoService, PedidoService>();
+builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<IPedidoItemRepository, PedidoItemRepository>();
+builder.Services.AddAutoMapper(typeof(App.Services.ClienteService).Assembly);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
