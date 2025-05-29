@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Pedido</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../style/styles.css">
+    <style>
+        .produto-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .produto-item .quantidade {
+            width: 60px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Formulário de Pedido</h2>
+        <form id="pedido-form">
+            <div class="form-group">
+                <label for="clienteId">Cliente</label>
+                <select class="form-control" id="clienteId" required>
+                    <option value="">Selecione um Cliente</option>
+                </select>
+            </div>
+
+            <div id="produtos-pedido">
+                </div>
+
+            <div class="form-group">
+                <label for="produtoId">Produto</label>
+                <select class="form-control" id="produtoId">
+                    <option value="">Selecione um Produto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantidade">Quantidade</label>
+                <input type="number" class="form-control quantidade" id="quantidade" value="1" min="1">
+            </div>
+            <button type="button" class="btn btn-success" id="adicionarProduto">Adicionar Produto</button>
+
+            <button type="submit" class="btn btn-primary">Salvar Pedido</button>
+            <a href="index.html" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module">
+        import API_BASE_URL from '../config/config.js';
+
+        $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pedidoId = urlParams.get('id');
+            let produtos = [];
+
+            function preencherClientes() {
+                $.ajax({
+                    url: `${API_BASE_URL}/Cliente`,
+                    type: "GET",
+                    success: function (data) {
+                        var clienteSelect = $("#clienteId");
+                        $.each(data, function (index, cliente) {
+                            clienteSelect.append(`<option value="${cliente.id}">${cliente.nome}</option>`);
+                        });
+                        if (pedidoId) {
+                            carregarPedido(pedidoId);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Erro ao carregar clientes:", error);
+                    }
+                });
+            }
+
+            function preencherProdutos() {
+                $.ajax({
+                    url: `${API_BASE_URL}/Produto`,
+                    type: "GET",
+                    success: function (data) {
+                        var produtoSelect = $("#produtoId");
+                        $.each(data, function (index, produto) {
+                            produtoSelect.append(`<option value="${produto.id}">${produto.nome}</option>`);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Erro ao carregar produtos:", error);
+                    }
+                });
+            }
+
+            $("#adicionarProduto").click(function () {
+                var produtoId = parseInt($("#produtoId").val());
+                var quantidade = parseInt($("#quantidade").val());
+                if (produtoId && quantidade > 0) {
+                    adicionarProduto(produtoId, quantidade);
+                    $("#produtoId").val('');
+                    $("#quantidade").val(1);
+                } else {
+                    alert("Selecione um produto e uma quantidade válida.");
+                }
+            });
+
+            function adicionarProduto(produtoId, quantidade) {
+                $.ajax({
+                    url: `${API_BASE_URL}/Produto/${produtoId}`,
+                    type: "GET",
+                    success: function (produto) {
+                        produtos.push({
+                            produtoId: produto.id,
+                            nome: produto.nome,
+                            precoUnitario: produto.preco,
+                            quantidade: quantidade
+                        });
+                        exibirProdutosPedido();
+                    },
+                    error: function (error) {
+                        console.error("Erro ao obter detalhes do produto:", error);
+                    }
+                });
+            }
+
+            function exibirProdutosPedido() {
+                var produtosPedidoDiv = $("#produtos-pedido");
+                produtosPedidoDiv.empty();
+                let valorTotal = 0;
+                $.each(produtos, function (index, item) {
+                    const subtotal = item.precoUnitario * item.quantidade;
+                    valorTotal += subtotal;
+                    produtosPedidoDiv.append(`
+                        <div class="produto-item">
+                            <span>${item.nome} x ${item.quantidade} = ${subtotal.toFixed(2)}</span>
+                            <input type="number" class="quantidade" data-index="${index}" value="${item.quantidade}" min="1">
+                            <button type="button" class="btn btn-danger btn-sm remover-produto" data-index="${index}">Remover</button>
+                        </div>
+                    `);
+                });
+                produtosPedidoDiv.append(`<p><b>Valor Total: ${valorTotal.toFixed(2)}</b></p>`);
+
+                $(".quantidade").change(function () {
+                    const index = $(this).data('index');
+                    produtos[index].quantidade = parseInt($(this).val());
+                    exibirProdutosPedido();
+                });
+
+                $(".remover-produto").click(function () {
+                    const index = $(this).data('index');
+                    produtos.splice(index, 1);
+                    exibirProdutosPedido();
+                });
+            }
+
+            function carregarPedido(id) {
+                $.ajax({
+                    url: `${API_BASE_URL}/Pedido/${id}`,
+                    type: "GET",
+                    success: function (pedido) {
+                        $("#clienteId").val(pedido.clienteId);
+                        produtos = pedido.itens.map(item => ({
+                            produtoId: item.produtoId,
+                            nome: item.produtoNome,
+                            precoUnitario: item.precoUnitario,
+                            quantidade: item.quantidade
+                        }));
+                        exibirProdutosPedido();
+                    },
+                    error: function (error) {
+                        console.error("Erro ao carregar pedido:", error);
+                    }
+                });
+            }
+
+            $("#pedido-form").submit(function (event) {
+                event.preventDefault();
+
+                const clienteId = parseInt($("#clienteId").val());
+                if (!clienteId) {
+                    alert("Selecione um cliente.");
+                    return;
+                }
+
+                if (produtos.length === 0) {
+                    alert("Adicione pelo menos um produto ao pedido.");
+                    return;
+                }
+
+                const pedidoData = {
+                    ClienteId: clienteId,
+                    Status: "Nov",
+                    ItensPedido: produtos.map(item => ({
+                        ProdutoId: item.produtoId,
+                        Quantidade: item.quantidade,
+                        PrecoUnitario: item.precoUnitario
+                    }))
+                };
+
+                const apiUrl = pedidoId ? `${API_BASE_URL}/Pedido/${pedidoId}` : `${API_BASE_URL}/Pedido`;
+                const method = pedidoId ? "PUT" : "POST";
+                debugger
+                $.ajax({
+                    url: apiUrl,
+                    type: method,
+                    contentType: "application/json",
+                    data: JSON.stringify(pedidoData),
+                    success: function () {
+                        alert("Pedido salvo com sucesso!");
+                        window.location.href = "index.html";
+                    },
+                    error: function (error) {
+                        console.error("Erro ao salvar pedido:", error);
+                    }
+                });
+            });
+
+            preencherClientes();
+            preencherProdutos();
+        });
+    </script>
+</body>
+
+</html>

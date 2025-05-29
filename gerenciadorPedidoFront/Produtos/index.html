@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Produtos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Produtos</h2>
+        <a href="form.html" class="btn btn-primary mb-3">Novo Produto</a>
+        <a href="/HomeIndex.html" class="btn btn-primary mb-3">Inicio</a>
+        <!-- <div class="form-group">
+            <label for="filtro">Filtrar por Nome:</label>
+            <input type="text" class="form-control" id="filtro" placeholder="Digite o nome do produto">
+        </div>
+        <button class="btn btn-primary mb-3" id="buscar">Buscar</button> -->
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Quantidade em Estoque</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="produtos-lista">
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function listarProdutos(filtro) {
+                let url = "http://localhost:5159/api/Produto";
+                if (filtro) {
+                    url += "?filtro=" + filtro;
+                }
+
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    success: function (data) {
+                        var produtosLista = $("#produtos-lista");
+                        produtosLista.empty();
+                        $.each(data, function (index, produto) {
+                            produtosLista.append(`
+                                <tr>
+                                    <td>${produto.id}</td>
+                                    <td>${produto.nome}</td>
+                                    <td>${produto.descricao}</td>
+                                    <td>${produto.preco}</td>
+                                    <td>${produto.quantidadeEstoque}</td>
+                                    <td>
+                                        <a href="form.html?id=${produto.id}" class="btn btn-sm btn-warning">Editar</a>
+                                        <button class="btn btn-sm btn-danger" onclick="excluirProduto(${produto.id})">Excluir</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Erro ao buscar produtos:", error);
+                    }
+                });
+            }
+
+            listarProdutos();
+
+            $("#buscar").click(function() {
+                var filtro = $("#filtro").val();
+                listarProdutos(filtro); // Chamar a função com o termo de busca
+            });
+
+            window.excluirProduto = function (id) {
+                if (confirm("Tem certeza que deseja excluir este produto?")) {
+                    $.ajax({
+                        url: "http://localhost:5159/api/Produto/" + id, // Ajuste a URL da sua API se necessário
+                        type: "DELETE",
+                        success: function () {
+                            alert("Produto excluído com sucesso!");
+                            listarProdutos(); // Atualizar a lista após a exclusão
+                        },
+                        error: function (error) {
+                            console.error("Erro ao excluir produto:", error);
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+
+</html>

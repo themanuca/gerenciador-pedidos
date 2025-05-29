@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Clientes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Clientes</h2>
+        <a href="form.html" class="btn btn-primary mb-3">Novo Cliente</a>
+        <a href="/HomeIndex.html" class="btn btn-primary mb-3">Inicio</a>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="clientes-lista">
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function listarClientes() {
+                $.ajax({
+                    url: "http://localhost:5159/api/Cliente/",
+                    type: "GET",
+                    success: function (data) {
+                        debugger
+                        var clientesLista = $("#clientes-lista");
+                        clientesLista.empty();
+                        $.each(data, function (index, cliente) {
+                            clientesLista.append(`
+                                <tr>
+                                    <td>${cliente.id}</td>
+                                    <td>${cliente.nome}</td>
+                                    <td>${cliente.email}</td>
+                                    <td>${cliente.telefone}</td>
+                                    <td>
+                                        <a href="form.html?id=${cliente.id}" class="btn btn-sm btn-warning">Editar</a>
+                                        <button class="btn btn-sm btn-danger" onclick="excluirCliente(${cliente.id})">Excluir</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Erro ao buscar clientes:", error);
+                    }
+                });
+            }
+
+            listarClientes();
+
+            window.excluirCliente = function (id) {
+                if (confirm("Tem certeza que deseja excluir este cliente?")) {
+                    $.ajax({
+                        url: "http://localhost:5159/api/Cliente/" + id,
+                        type: "DELETE",
+                        success: function () {
+                            alert("Cliente excluído com sucesso!");
+                            listarClientes();
+                        },
+                        error: function (error) {
+                            console.error("Erro ao excluir cliente:", error);
+                        }
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+
+</html>

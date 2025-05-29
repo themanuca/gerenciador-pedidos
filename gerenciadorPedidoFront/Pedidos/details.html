@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Pedido</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../style/styles.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Detalhes do Pedido</h2>
+        <div id="pedido-detalhes">
+        </div>
+        <a href="index.html" class="btn btn-secondary mt-3">Voltar</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module">
+        import API_BASE_URL from '../config/config.js';
+
+        $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pedidoId = urlParams.get('id');
+            let pedidoAtual = null;
+
+            if (pedidoId) {
+                carregarDetalhesPedido(pedidoId);
+            } else {
+                $("#pedido-detalhes").html("<p>Nenhum pedido selecionado.</p>");
+            }
+
+            function carregarDetalhesPedido(id) {
+                $.ajax({
+                    url: `${API_BASE_URL}/Pedido/${id}`,
+                    type: "GET",
+                    success: function (pedido) {
+                        pedidoAtual = pedido;
+                        exibirDetalhesPedido(pedido);
+                    },
+                    error: function (error) {
+                        console.error("Erro ao carregar detalhes do pedido:", error);
+                        $("#pedido-detalhes").html("<p class='text-danger'>Erro ao carregar os detalhes do pedido.</p>");
+                    }
+                });
+            }
+
+            function exibirDetalhesPedido(pedido) {
+                let detalhesHtml = `
+                    <p><strong>ID:</strong> ${pedido.id}</p>
+                    <p><strong>Cliente:</strong> ${pedido.clienteNome}</p>
+                    <p><strong>Data do Pedido:</strong> ${new Date(pedido.dataPedido).toLocaleDateString()}</p>
+                    <p><strong>Valor Total:</strong> ${pedido.valorTotal.toFixed(2)}</p>
+                    <p><strong>Status:</strong> ${pedido.status}</p>
+                    <h4>Itens do Pedido:</h4>
+                    <ul>
+                `;
+                $.each(pedido.itensPedido, function (index, item) {
+                    detalhesHtml += `
+                        <li>${item.nome} - Quantidade: ${item.quantidade} - Preço Unitário: ${item.precoUnitario.toFixed(2)} - Subtotal: ${(item.quantidade * item.precoUnitario).toFixed(2)}</li>
+                    `;
+                });
+                detalhesHtml += `</ul>`;
+
+                if (pedido.status !== 'Finalizado') {
+                    detalhesHtml += `
+                        <div class="form-group">
+                            <label for="novoStatus">Alterar Status:</label>
+                            <select class="form-control" id="novoStatus">
+                                <option value="Novo" ${pedido.status === 'Novo' ? 'selected' : ''}>Novo</option>
+                                <option value="Processando" ${pedido.status === 'Processando' ? 'selected' : ''}>Processando</option>
+                                <option value="Finalizado" ${pedido.status === 'Finalizado' ? 'selected' : ''}>Finalizado</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="atualizarStatus">Atualizar Status</button>
+                    `;
+                }
+
+                $("#pedido-detalhes").html(detalhesHtml);
+
+                $("#atualizarStatus").click(function () {
+                    const novoStatus = $("#novoStatus").val();
+                    if (pedidoAtual && pedidoAtual.id) {
+                        atualizarStatusPedido(pedidoAtual.id, novoStatus);
+                    } else {
+                        alert("Erro: ID do pedido não encontrado.");
+                    }
+                });
+            }
+
+            function atualizarStatusPedido(id, novoStatus) {
+                $.ajax({
+                    url: `${API_BASE_URL}/Pedido/${id}`,
+                    type: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify({ id: id, status: novoStatus }),
+                    success: function () {
+                        alert("Status do pedido atualizado com sucesso!");
+                        carregarDetalhesPedido(id);
+                    },
+                    error: function (error) {
+                        console.error("Erro ao atualizar status do pedido:", error);
+                        alert("Erro ao atualizar o status do pedido.");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

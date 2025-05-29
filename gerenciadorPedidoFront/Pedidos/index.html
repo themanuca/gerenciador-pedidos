@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Pedidos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../style/styles.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Pedidos</h2>
+        <a href="form.html" class="btn btn-primary mb-3">Novo Pedido</a>
+        <a href="/HomeIndex.html" class="btn btn-primary mb-3">Inicio</a>
+
+        <div class="form-group">
+            <label for="filtroCliente">Filtrar por Cliente:</label>
+            <input type="text" class="form-control" id="filtroCliente" placeholder="Digite o nome do cliente">
+        </div>
+        <div class="form-group">
+            <label for="filtroStatus">Filtrar por Status:</label>
+            <select class="form-control" id="filtroStatus">
+                <option value="">Todos</option>
+                <option value="Novo">Novo</option>
+                <option value="Processando">Processando</option>
+                <option value="Finalizado">Finalizado</option>
+                </select>
+        </div>
+        <button class="btn btn-primary mb-3" id="buscar">Buscar</button>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Valor Total</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="pedidos-lista">
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module">
+        import API_BASE_URL from '../config/config.js';
+
+        $(document).ready(function () {
+            // Função para buscar e exibir os pedidos (com filtros)
+            function listarPedidos(filtroCliente, filtroStatus) {
+                let url = `${API_BASE_URL}/Pedido`; // URL base
+                let params = [];
+
+                if (filtroCliente) {
+                    params.push(`filtroCliente=${filtroCliente}`);
+                }
+                if (filtroStatus) {
+                    params.push(`filtroStatus=${filtroStatus}`);
+                }
+
+                if (params.length > 0) {
+                    url += "?" + params.join("&"); // Adiciona os parâmetros de filtro se existirem
+                }
+
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    success: function (data) {
+                        var pedidosLista = $("#pedidos-lista");
+                        pedidosLista.empty();
+                        $.each(data, function (index, pedido) {
+                            pedidosLista.append(`
+                                <tr>
+                                    <td>${pedido.id}</td>
+                                    <td>${pedido.clienteNome}</td> <td>${new Date(pedido.dataPedido).toLocaleDateString()}</td>
+                                    <td>${pedido.valorTotal.toFixed(2)}</td>
+                                    <td>${pedido.status}</td>
+                                    <td>
+                                        <a href="details.html?id=${pedido.id}" class="btn btn-sm btn-info">Detalhes</a>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Erro ao buscar pedidos:", error);
+                    }
+                });
+            }
+
+            // Chamar a função para listar os pedidos ao carregar a página (sem filtros iniciais)
+            listarPedidos();
+
+            // Evento de clique no botão "Buscar"
+            $("#buscar").click(function () {
+                var filtroCliente = $("#filtroCliente").val();
+                var filtroStatus = $("#filtroStatus").val();
+                listarPedidos(filtroCliente, filtroStatus);
+            });
+        });
+    </script>
+</body>
+
+</html>

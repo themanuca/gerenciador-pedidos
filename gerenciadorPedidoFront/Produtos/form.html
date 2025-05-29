@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Produto</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Formulário de Produto</h2>
+        <form id="produto-form">
+            <div class="form-group">
+                <label for="nome">Nome</label>
+                <input type="text" class="form-control" id="nome" placeholder="Digite o nome" required>
+            </div>
+            <div class="form-group">
+                <label for="descricao">Descrição</label>
+                <textarea class="form-control" id="descricao" placeholder="Digite a descrição" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="preco">Preço</label>
+                <input type="number" class="form-control" id="preco" placeholder="Digite o preço" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="quantidadeEstoque">Quantidade em Estoque</label>
+                <input type="number" class="form-control" id="quantidadeEstoque" placeholder="Digite a quantidade em estoque"
+                    required>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="index.html" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const produtoId = urlParams.get('id');
+
+            if (produtoId) {
+                $.ajax({
+                    url: `http://localhost:5159/api/Produto/${produtoId}`,
+                    type: "GET",
+                    success: function (produto) {
+                        $("#nome").val(produto.nome);
+                        $("#descricao").val(produto.descricao);
+                        $("#preco").val(produto.preco);
+                        $("#quantidadeEstoque").val(produto.quantidadeEstoque);
+                    },
+                    error: function (error) {
+                        console.error("Erro ao carregar produto:", error);
+                    }
+                });
+            }
+
+            $("#produto-form").submit(function (event) {
+                event.preventDefault();
+
+                const nome = $("#nome").val();
+                const descricao = $("#descricao").val();
+                const preco = parseFloat($("#preco").val());
+                const quantidadeEstoque = parseInt($("#quantidadeEstoque").val());
+
+                const produtoData = {
+                    nome: nome,
+                    descricao: descricao,
+                    preco: preco,
+                    quantidadeEstoque: quantidadeEstoque
+                };
+
+                if (produtoId) {
+                    $.ajax({
+                        url: `http://localhost:5159/api/Produto/${produtoId}`,
+                        type: "PUT",
+                        contentType: "application/json",
+                        data: JSON.stringify(produtoData),
+                        success: function () {
+                            alert("Produto atualizado com sucesso!");
+                            window.location.href = "index.html";
+                        },
+                        error: function (error) {
+                            console.error("Erro ao atualizar produto:", error);
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: "http://localhost:5159/api/Produto",
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(produtoData),
+                        success: function () {
+                            alert("Produto criado com sucesso!");
+                            window.location.href = "index.html";
+                        },
+                        error: function (error) {
+                            console.error("Erro ao criar produto:", error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

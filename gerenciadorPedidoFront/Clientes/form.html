@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Cliente</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2>Formulário de Cliente</h2>
+        <form id="cliente-form">
+            <div class="form-group">
+                <label for="nome">Nome</label>
+                <input type="text" class="form-control" id="nome" placeholder="Digite o nome" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="Digite o email" required>
+            </div>
+            <div class="form-group">
+                <label for="telefone">Telefone</label>
+                <input type="text" class="form-control" id="telefone" placeholder="Digite o telefone" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="index.html" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module">
+        const API_BASE_URL = "http://localhost:5159/api";
+        $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const clienteId = urlParams.get('id');
+            if (clienteId) {
+                $.ajax({
+                    url: `${API_BASE_URL}/Cliente/${clienteId}`,
+                    type: "GET",
+                    success: function (cliente) {
+                        $("#nome").val(cliente.nome);
+                        $("#email").val(cliente.email);
+                        $("#telefone").val(cliente.telefone);
+                    },
+                    error: function (error) {
+                        console.error("Erro ao carregar cliente:", error);
+                    }
+                });
+            }
+
+            $("#cliente-form").submit(function (event) {
+                event.preventDefault();
+                const nome = $("#nome").val();
+                const email = $("#email").val();
+                const telefone = $("#telefone").val();
+
+                const clienteData = {
+                    nome: nome,
+                    email: email,
+                    telefone: telefone
+                };
+                debugger
+                const apiUrl = clienteId ? `${API_BASE_URL}/Cliente/${clienteId}` : `${API_BASE_URL}/Cliente/`;
+                const method = clienteId ? "PUT" : "POST";
+                
+                if (clienteId) {
+                    $.ajax({
+                        url: `${API_BASE_URL}/Cliente/${clienteId}`,
+                        type: "PUT",
+                        contentType: "application/json",
+                        data: JSON.stringify(clienteData),
+                        success: function () {
+                            alert("Cliente atualizado com sucesso!");
+                            window.location.href = "index.html";
+                        },
+                        error: function (error) {
+                            console.error("Erro ao atualizar cliente:", error);
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: `${API_BASE_URL}/Cliente/`,
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify(clienteData),
+                        success: function () {
+                            alert("Cliente criado com sucesso!");
+                            window.location.href = "index.html";
+                        },
+                        error: function (error) {
+                            console.error("Erro ao criar cliente:", error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
