@@ -11,5 +11,6 @@ namespace Domain.Interfaces
     {
         Task CreatePedidoItem(PedidoItem pedidoItem);
         Task<IEnumerable<PedidoItem>>GetPedidoItems(int idPedido);
+        Task<IEnumerable<PedidoItemDetais>> GetPedidoItemsWithProduto(int idPedido);
     }
 }

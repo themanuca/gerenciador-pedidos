@@ -98,28 +98,19 @@ namespace App.Services
             var pedido = await _pedidoRepository.GetPedidoById(id);
             if(pedido == null)
             {
-                throw new ArgumentException($"Pedido não encontrado.");
+                throw new ArgumentException("Pedido não encontrado.");
             }
-            var pedidoItens = await _itemRepository.GetPedidoItems(pedido.Id);
-            if(pedidoItens == null)
-            {
-                throw new ArgumentException($"Sem itens adicionados.");
-            }
-            var pedidoItensDetails = new List<PedidoItemDetaisDTO> { };
-            foreach( var item in pedidoItens)
-            {
-                var produto = await _produtoRepository.GetProdutoById(item.ProdutoId);
+            
+            var pedidoItemResult = await _itemRepository.GetPedidoItemsWithProduto(pedido.Id) ?? throw new ArgumentException("Sem itens adicionados.");
+            IEnumerable<PedidoItemDetaisDTO> pedidoItensDetails = pedidoItemResult.Select(source => new PedidoItemDetaisDTO {
+                Id = source.Id,
+                Nome = source.Nome,
+                PedidoId = source.PedidoId,
+                PrecoUnitario = source.PrecoUnitario,
+                ProdutoId = source.ProdutoId,
+                Quantidade = source.Quantidade,
+            });
 
-                var pedidoItem = new PedidoItemDetaisDTO {
-                    Id = item.Id,
-                    Nome = produto.Nome,
-                    ProdutoId = produto.Id,
-                    PedidoId = pedido.Id,
-                    Quantidade = item.Quantidade,
-                    PrecoUnitario = item.PrecoUnitario,
-                };
-                pedidoItensDetails.Add(pedidoItem);
-            }
             return new PedidoDetaisDTO
             { 
                 Id = pedido.Id,

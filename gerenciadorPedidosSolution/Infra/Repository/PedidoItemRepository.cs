@@ -37,5 +37,22 @@ namespace Infra.Repository
             
             return await connection.QueryAsync<PedidoItem>(sql, new { Id = idPedido});
         }
+        public async Task<IEnumerable<PedidoItemDetais>> GetPedidoItemsWithProduto(int idPedido)
+        {
+            var sql = @"SELECT 
+                        PedidoItem.Id AS Id,
+                        PedidoItem.PedidoId,
+                        PedidoItem.ProdutoId,
+                        PedidoItem.Quantidade,
+                        PedidoItem.PrecoUnitario,
+                        Produto.Nome AS Nome 
+                        FROM PedidoItem 
+                        INNER JOIN Produto ON 
+                        PedidoItem.ProdutoId = Produto.Id 
+                        WHERE PedidoId = @Id;";
+            using var connection = _dBContext.CreateConnection();
+
+            return await connection.QueryAsync<PedidoItemDetais>(sql, new { Id = idPedido });
+        }
     }
 }
